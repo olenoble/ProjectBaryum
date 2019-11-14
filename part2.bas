@@ -1,9 +1,11 @@
 10 REM ###################################################
 20 REM ### MAZE
-30 screen 0
+30 screen 0: gothit = 0: founddoor = 0
 40 cls: gosub 1000
 50 cls: gosub 2000
-90 locate 2, 1: print CHR$(210)
+60 while founddoor = 0
+70 gosub 3000
+80 wend 
 210 locate 23, 1: system
 
 1000 REM MAZE GENERATION
@@ -33,7 +35,8 @@
 1240 jo = jo - 1: if M((io - 1) * wm + jo - 1) = 0 then found = 1
 1250 if jo < wm / 2 then jo = wm - 1: io = io - 1
 1260 wend
-1900 return
+1270 ig = 2: jg = 1
+1280 return
 
 2000 REM DRAW MAZE
 2010 for i = 1 to lm
@@ -42,17 +45,20 @@
 2040 next j
 2050 next i
 2060 locate io, jo: print chr$(233)
-2100 return
+2070 locate ig, jg: print CHR$(210)
+2080 return
 
-3000 REM MOVE FORWARD
-3010 for i = lr to 2 step -1
-3020 walls(i) = walls(i-1)
-3030 next i
-3040 if iter mod niter = 0 then newpos = int(rnd * 3) - 1
-3050 walls(1) = walls(1) + int(newpos): iter = iter + 1
-3060 if walls(1) >= 30 then walls(i) = 29
-3070 if walls(1) <= -30+2*wr then walls(i) = -29 + 2*wr
-3080 return
+3000 REM MOVE CHARACTER
+3010 hasmoved = 0: ign = ig: jgn = jg: v$ = inkey$
+3020 if v$ = "j" then hasmoved = 1: jgn = jgn - 1
+3030 if v$ = "l" then hasmoved = 1: jgn = jgn + 1
+3040 if v$ = "i" then hasmoved = 1: ign = ign - 1
+3050 if v$ = "k" then hasmoved = 1: ign = ign + 1
+3060 if v$ = "s" then system
+3060 if M((ign-1) * wm + jgn - 1) = 1 then hasmoved = 0
+3070 if hasmoved = 1 then locate ig, jg: print " ": ig = ign: jg = jgn: locate ig, jg: print chr$(210)
+3080 if (ig = io) and (jg = jo) then founddoor = 1
+3090 return
 
 4000 REM TIMER  
 4010 dt = 1
