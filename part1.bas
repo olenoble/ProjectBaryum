@@ -1,19 +1,20 @@
 10 REM ###################################################
 20 REM ### CAR RACE
-30 screen 0: cls
-40 gosub 1000
-50 while (iter < 250) and (hascrashed = 0)
+30 screen 2: cls
+40 gosub 1000: gosub 6000: maxiter = 1000: view (0,0)-(639, lr*8)
+50 while (iter < maxiter) and (hascrashed = 0)
 60 cls: gosub 2000
 70 gosub 3000
 80 gosub 5000
 90 gosub 4000
-100 wend
-110 if hascrashed then locate 23, 10: print "YOU CRASHED!!!" else print "YOU WON!!!"
-210 system
+100 gosub 7000
+110 wend
+120 view: screen 0: if hascrashed then locate 23, 10: print "YOU CRASHED!!!" else print "YOU WON!!!"
+200 system
 
 1000 REM INITIALISATION
 1010 RANDOMIZE TIMER
-1020 prevt = timer: ttw = 0.05: iter = 0
+1020 prevt = timer: ttw = 0.01: iter = 0
 1020 niter = 10: newpos = 0: carpos = 40: hascrashed = 0
 1040 lr = 20: wr = 8: dim walls(lr)
 1050 for i = 1 to lr
@@ -58,3 +59,14 @@
 5090 rem locate 23, 10: print hascrashed
 5100 next k
 5110 return
+
+6000 REM DISTANCE BAR
+6010 barlength = 75
+6020 for b = 1 to barlength: locate lr+1,b: print chr$(219): next b
+6030 return
+
+7000 REM UPDATE DISTANCE BAR
+7010 barfull = int(barlength /maxiter * (maxiter - iter))
+7020 locate lr+1,barfull+1: print " "
+7030 return
+
