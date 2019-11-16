@@ -1,20 +1,31 @@
 10 REM ###################################################
 20 REM ### CAR RACE
-30 screen 2: cls
-40 gosub 1000: gosub 6000: maxiter = 1000: view (0,0)-(639, lr*8)
-50 while (iter < maxiter) and (hascrashed = 0)
-60 cls: gosub 2000
-70 gosub 3000
-80 gosub 5000
-90 gosub 4000
-100 gosub 7000
-110 wend
-120 view: screen 0: if hascrashed then locate 23, 10: print "YOU CRASHED!!!" else print "YOU WON!!!"
-200 system
+30 screen 0: cls
+40 print "PART 1 - ALL YOUR BASE ARE BELONG TO US"
+50 locate 5, 1: print "blah, blah"
+60 locate 10, 1: print "INSTRUCTIONS:": print "A - LEFT": print "L - RIGHT": print "A progress bar will show at the bottom. The shorter it gets the closer you are!"
+70 locate 15, 1: input "READY [Y/N]"; R$
+80 if (R$ = "y") or (R$ = "Y") then gosub 500 else goto 30
+90 end
+
+500 REM GAME LOOP
+510 screen 2: cls
+520 gosub 1000
+530 gosub 6000: iter = 0: maxiter = 1000: view (0,0)-(639, lr*8)
+540 while (iter < maxiter) and (hascrashed = 0)
+550 cls: gosub 2000
+560 gosub 3000
+570 gosub 5000
+580 gosub 4000
+590 gosub 7000
+600 wend
+610 if hascrashed then locate lr+2, 1: input "YOU CRASHED!!! DO YOU WANT TO TRY AGAIN [Y/N] ?", T$ else input "YOU ARRIVED!!! PRESS ENTER TO CONTINUE", E$
+620 if hascrashed and ((T$ = "Y") or (T$ = "y")) then hascrashed = 0: carpos = 40+walls(lr)-wr: locate lr+2,1: gosub 8000: goto 530 else system
+630 return
 
 1000 REM INITIALISATION
 1010 RANDOMIZE TIMER
-1020 prevt = timer: ttw = 0.01: iter = 0
+1020 prevt = timer: ttw = 0.01
 1020 niter = 10: newpos = 0: carpos = 40: hascrashed = 0
 1040 lr = 20: wr = 8: dim walls(lr)
 1050 for i = 1 to lr
@@ -69,4 +80,8 @@
 7010 barfull = int(barlength /maxiter * (maxiter - iter))
 7020 locate lr+1,barfull+1: print " "
 7030 return
+
+8000 REM WIPE OUT BOTTOM INFO
+8010 for k = 1 to 79: locate lr+1, k: print " ": locate lr+2: print " ": next k
+8020 return
 
