@@ -1,20 +1,32 @@
 10 REM ###################################################
 20 REM ### MAZE
-30 screen 0: gothit = 0: founddoor = 0
-40 cls: gosub 1000
-50 cls: gosub 2000
-60 btime = 0: stept = 0.1
-70 while (founddoor = 0) and (gothit = 0)
-80 gosub 3000
-90 gosub 4000
-100 wend
-110 if gothit = 1 then locate lm + 1,1: print "You just got caught!"
-120 if founddoor = 1 then locate lm + 1,1: print "You found the exit!!"
-200 system
+30 screen 0: cls
+40 print "PART 2 - WAKA WAKA WAKA"
+50 locate 5, 1: print "blah, blah"
+60 locate 10, 1: print "INSTRUCTIONS:": print "J - LEFT": print "L - RIGHT": print "I - UP": print "K - DOWN"
+70 locate 16, 1: input "READY [Y/N]"; R$
+80 if (R$ = "y") or (R$ = "Y") then gosub 500 else goto 30
+90 end
+
+500 REM GAME LOOP
+510 gothit = 0: founddoor = 0
+520 gosub 1000
+530 screen 2: cls: gosub 2000
+540 btime = 0: stept = 0.1
+550 while (founddoor = 0) and (gothit = 0)
+560 gosub 3000
+570 gosub 4000
+580 wend
+590 if gothit = 1 then gosub 700 else locate lm+2,1: input "YOU FOUND THE EXIT!!! PRESS ENTER TO CONTINUE", E$
+600 return
+
+700 REM YOU LOSE
+710 locate lm+2,1: input "YOU GOT CAUGHT!!! DO YOU WANT TO TRY AGAIN [Y/N] ?", T$
+720 if (T$ = "Y") or (T$ = "y") then gothit = 0: ig = 2: jg = 1: goto 530 else system
 
 1000 REM MAZE GENERATION
-1010 print "Generating maze:": locate 1, 20: print "[": locate 1, 31: print "]"
-1015 REM RANDOMIZE TIMER
+1010 locate 17, 1: print "Generating maze:": locate 17, 20: print "[": locate 17, 31: print "]"
+1015 rem RANDOMIZE -1977
 1020 wm = 79: lm = 22: dim M(wm*lm): dim EM(32): steps = (wm - 3) * (lm - 2) / 10.0: sparseness = 0.75
 1030 for i = 1 to lm: M((i-1)*wm) = 1: next i
 1040 for i = 1 to lm: M((i-1)*wm + wm-1) = 1: next i
@@ -31,7 +43,7 @@
 1150 newval = EM(empos)
 1160 if newval < 0 then if rnd < sparseness then newval = 0 else newval = 1
 1170 M((i-1) * wm + j - 1) = newval
-1180 if int(counter / steps) < int((counter+1)/steps) then locate 1, 20 + int((counter+1)/steps): print chr$(178)
+1180 if int(counter / steps) < int((counter+1)/steps) then locate 17, 20 + int((counter+1)/steps): print chr$(178)
 1190 counter = counter + 1
 1200 next j
 1210 next i
@@ -59,7 +71,7 @@
 3030 if v$ = "l" then hasmoved = 1: jgn = jgn + 1
 3040 if v$ = "i" then hasmoved = 1: ign = ign - 1
 3050 if v$ = "k" then hasmoved = 1: ign = ign + 1
-3060 if v$ = "q" then system
+3060 if v$ = "q" then locate lm+1,1: input "Do you want to restart [Y/N] ?", Q$: if (Q$ = "Y") or (Q$ = "y") then goto 30
 3060 if M((ign-1) * wm + jgn - 1) = 1 then hasmoved = 0
 3070 if hasmoved = 1 then locate ig, jg: print " ": ig = ign: jg = jgn: locate ig, jg: print chr$(210)
 3080 if (ig = io) and (jg = jo) then founddoor = 1
