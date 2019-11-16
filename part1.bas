@@ -3,15 +3,15 @@
 30 screen 0: cls
 40 print "PART 1 - ALL YOUR BASE ARE BELONG TO US"
 50 locate 5, 1: print "blah, blah"
-60 locate 10, 1: print "INSTRUCTIONS:": print "A - LEFT": print "L - RIGHT": print "A progress bar will show at the bottom. The shorter it gets the closer you are!"
-70 locate 15, 1: input "READY [Y/N]"; R$
+60 locate 10, 1: print "INSTRUCTIONS:": print "A - LEFT": print "L - RIGHT": print " ": print "The progress bar at the bottom will show you the distance to your destination"
+70 locate 16, 1: input "READY [Y/N]"; R$
 80 if (R$ = "y") or (R$ = "Y") then gosub 500 else goto 30
 90 end
 
 500 REM GAME LOOP
 510 screen 2: cls
 520 gosub 1000
-530 gosub 6000: iter = 0: maxiter = 1000: view (0,0)-(639, lr*8)
+530 gosub 6000: iter = 0: maxiter = 750: view (0,0)-(639, lr*8)
 540 while (iter < maxiter) and (hascrashed = 0)
 550 cls: gosub 2000
 560 gosub 3000
@@ -19,9 +19,14 @@
 580 gosub 4000
 590 gosub 7000
 600 wend
-610 if hascrashed then locate lr+2, 1: input "YOU CRASHED!!! DO YOU WANT TO TRY AGAIN [Y/N] ?", T$ else input "YOU ARRIVED!!! PRESS ENTER TO CONTINUE", E$
-620 if hascrashed and ((T$ = "Y") or (T$ = "y")) then hascrashed = 0: carpos = 40+walls(lr)-wr: locate lr+2,1: gosub 8000: goto 530 else system
-630 return
+610 if hascrashed then gosub 700 else locate lr+2,1: input "YOU ARRIVED!!! PRESS ENTER TO CONTINUE", E$
+620 return
+
+700 REM YOU LOSE
+710 locate lr+2, 1: input "YOU CRASHED!!! DO YOU WANT TO TRY AGAIN [Y/N] ?", T$
+720 if (T$ = "Y") or (T$ = "y") then hascrashed = 0: carpos = 40+walls(lr)-wr: gosub 8000: goto 530 else system
+730 input "you should reach that line of code ??", WTF$
+740 system
 
 1000 REM INITIALISATION
 1010 RANDOMIZE TIMER
@@ -62,10 +67,10 @@
 5010 numkey = 2
 5020 for k = 1 to numkey
 5030 locate lr, carpos: print "W"
-5040 v$ = inkey$
-5050 if v$ = "a" then carpos = carpos - 1
-5060 if v$ = "l" then carpos = carpos + 1
-5070 locate lr, carpos: print "W"
+5040 v$ = inkey$: dcp = 0
+5050 if v$ = "a" then dcp = -1
+5060 if v$ = "l" then dcp = 1
+5070 if dcp <> 0 then locate lr, carpos: print " ": carpos = carpos + dcp: locate lr, carpos: print "W"
 5080 if (carpos >= walls(lr)+40) or (carpos <= walls(lr)+40-2*wr) then hascrashed = 1 else hascrashed = 0
 5090 rem locate 23, 10: print hascrashed
 5100 next k
@@ -82,6 +87,6 @@
 7030 return
 
 8000 REM WIPE OUT BOTTOM INFO
-8010 for k = 1 to 79: locate lr+1, k: print " ": locate lr+2: print " ": next k
+8010 for k = 1 to 79: locate lr+1, k: print " ": locate lr+2, k: print " ": next k
 8020 return
 
