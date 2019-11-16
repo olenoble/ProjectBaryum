@@ -26,7 +26,7 @@
 
 1000 REM MAZE GENERATION
 1010 locate 17, 1: print "Generating maze:": locate 17, 20: print "[": locate 17, 31: print "]"
-1015 rem RANDOMIZE -1977
+1015 rem RANDOMIZE TIMER
 1020 wm = 79: lm = 22: dim M(wm*lm): dim EM(32): steps = (wm - 3) * (lm - 2) / 10.0: sparseness = 0.75
 1030 for i = 1 to lm: M((i-1)*wm) = 1: next i
 1040 for i = 1 to lm: M((i-1)*wm + wm-1) = 1: next i
@@ -47,13 +47,23 @@
 1190 counter = counter + 1
 1200 next j
 1210 next i
-1220 io = lm - 1: jo = wm - 1: found = 0
-1230 while found = 0
-1240 jo = jo - 1: if M((io - 1) * wm + jo - 1) = 0 then found = 1
-1250 if jo < wm / 2 then jo = wm - 1: io = io - 1
-1260 wend
-1270 ig = 2: jg = 1: ib = io: jb = jo: dib = -1: djb = 0: redrawdoor = 1
+1220 ig = 2: jg = 1: redrawdoor = 1: RANDOMIZE TIMER
+1230 numbaddies = 5: dim BADX(numbaddies): dim BADY(numbaddies): dim BADdX(numbaddies): dim BADdY(numbaddies)
+1240 for bk = 1 to numbaddies
+1250 gosub 1500
+1260 next bk
+1270 gosub 5100
 1280 return
+
+1500 REM BADDIES INITIAL POSITION
+1510 ir = int(3 + rnd * (lm-4)): jr = int(1 + rnd * (wm-2)): found = 0
+1520 while found = 0
+1530 jr = jr + 1: if jr >= wm then jr = 2: ir = ir + 1
+1540 if ir >= lm - 1 then ir = 3
+1550 if M((ir - 1) * wm + jr - 1) = 0 then found = 1
+1560 wend
+1570 BADY(bk) = ir: BADX(bk) = jr: BADdY(bk) = -1: BADdX(bk) = 0
+1580 return
 
 2000 REM DRAW MAZE
 2010 for i = 1 to lm
@@ -77,28 +87,40 @@
 3080 if (ig = io) and (jg = jo) then founddoor = 1
 3090 return
 
-4000 REM MOVE BADDY
+4000 REM CHECK BADDIES
 4010 if (timer - btime) < stept then hasmoved = 0 else hasmoved = 1
-4020 if hasmoved = 1 then locate ib, jb: print " ": gosub 4500: locate ib, jb: print chr$(232)
+4020 if hasmoved = 1 then gosub 4500
 4030 if redrawdoor = 1 then locate io, jo: print chr$(233)
-4040 if (io = ib) and (jo = jb) then redrawdoor = 1 else redrawdoor = 0
-4050 if (ig = ib) and (jg = jb) then gothit = 1
-4070 if hasmoved = 1 then btime = timer
-4100 return 
+4040 for bk = 1 to numbaddies
+4050 if (io = BADY(bk)) and (jo = BADX(bk)) then redrawdoor = 1 else redrawdoor = 0
+4060 if (ig = BADY(bk)) and (jg = BADX(bk)) then gothit = 1
+4070 next bk
+4080 if hasmoved = 1 then btime = timer
+4090 return
 
-4500 REM NEW POSITION
-4510 validmove = 0
-4520 while validmove = 0
-4530 if M((ib + dib - 1) * wm + (jb + djb - 1)) = 0 then validmove = 1 else dp = rnd: dr = rnd
-4540 if (validmove = 0) and (dp >= 0.5) and (dr >= 0.5) then dib = 1: djb = 0
-4550 if (validmove = 0) and (dp >= 0.5) and (dr <  0.5) then dib = -1: djb = 0
-4560 if (validmove = 0) and (dp <  0.5) and (dr >= 0.5) then dib = 0: djb = 1
-4570 if (validmove = 0) and (dp <  0.5) and (dr <  0.5) then dib = 0: djb = -1
-4580 wend
-4590 ib = ib + dib: jb = jb + djb
-4600 return
+4500 REM MOVE BADDIES
+4510 for bk = 1 to numbaddies
+4520 locate BADY(bk), BADX(bk): print " ": 
+4530 validmove = 0
+4540 while validmove = 0
+4550 if M((BADY(bk) + BADdY(bk) - 1) * wm + (BADX(bk) + BADdX(bk) - 1)) = 0 then validmove = 1 else dp = rnd: dr = rnd
+4560 if (validmove = 0) and (dp >= 0.5) and (dr >= 0.5) then BADdY(bk) = 1: BADdX(bk) = 0
+4570 if (validmove = 0) and (dp >= 0.5) and (dr <  0.5) then BADdY(bk) = -1: BADdX(bk) = 0
+4580 if (validmove = 0) and (dp <  0.5) and (dr >= 0.5) then BADdY(bk) = 0: BADdX(bk) = 1
+4590 if (validmove = 0) and (dp <  0.5) and (dr <  0.5) then BADdY(bk) = 0: BADdX(bk) = -1
+4600 wend
+4610 BADY(bk) = BADY(bk) + BADdY(bk): BADX(bk) = BADX(bk) + BADdX(bk)
+4620 locate BADY(bk), BADX(bk): print chr$(232)
+4630 next bk
+4640 return
 
 5000 REM DATA FOR MAZE 
 5010 DATA 1, 1, 1, -1, 0, 0, -1, -1, 1, 1, 1, 1, -1, 0, 0, 0, 1, 1, 1, -1, 0, 0, 0, 0, -1, 0, 1, -1, -1, 0, 0, 0
 
-
+5100 REM PLACE DOOR
+5110 io = lm - 1: jo = wm - 1: found = 0
+5120 while found = 0
+5130 jo = jo - 1: if M((io - 1) * wm + jo - 1) = 0 then found = 1
+5140 if jo < wm / 2 then jo = wm - 1: io = io - 1
+5150 wend
+5160 return
