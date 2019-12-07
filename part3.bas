@@ -11,10 +11,10 @@
 500 REM GAME LOOP
 510 screen 2: cls
 520 gosub 1000
-530 iter = 0: maxiter = 30: view (0,0)-(boardstart*8, 199): haswon = 0
-540 while (iter < maxiter) and (haswon = 0)
+530 iter = 0: maxiter = 10: view (0,0)-(boardstart*8, 199): haswon = 0: isfinished = 0 
+540 while (iter < maxiter) and (isfinished = 0)
 550 gosub 2000
-570 rem if haswon then gosub 5000  <<-- this is when the computer picks a column (after each move check if anyone wins
+570 if haswon = 0 then gosub 4000
 580 rem gosub 4000  <<-- display some did you know ?!
 590 rem gosub 7000
 595 iter = iter + 1
@@ -28,7 +28,7 @@
 720 if (T$ = "Y") or (T$ = "y") then gothit = 0: ig = 2: jg = 1: goto 510 else system
 
 1000 REM BOARD GENERATION
-1010 boardstart = 25: bl = 10: bls = bl * 2: bh = 20: bcs = (80 - boardstart - bls) / 2 + boardstart
+1010 boardstart = 25: bl = 10: bls = bl * 2: bh = 20: bcs = (80 - boardstart - bls) / 2 + boardstart: RANDOMIZE TIMER
 1020 for i = 1 to bh: locate i, bcs: print CHR$(221): next i
 1030 for i = 1 to bh: locate i, bcs + bls + 1: print CHR$(222): next i
 1040 for i = 1 to bls+2: locate bh+1, bcs + i - 1: print CHR$(223): next i
@@ -51,28 +51,25 @@
 3010 freq = 22.0 / 7.0: fric = 0.75: tc = 3 / fric: omega = sqr(freq * freq - fric * fric)
 3020 ratio = sqr(1 + fric * fric / (omega * omega)): A = ratio * (bh - NP(2)): phi = atn(1 / (ratio * SQR(- 1 /(ratio * ratio) + 1)))
 3030 ypos = bh: locate bh - ypos + 1, bcs + NP(1) * 2: print CHR$(NP(3))
-3040 time0 = timer: dt = 0.01: prevt = time0
-3050 while ((timer - time0) <= tc) or (ypos - NP(2)) > 1
+3040 time0 = timer: dt = 0.01: prevt = time0: speed = 0
+3050 while (speed >= 1) or (ypos - NP(2)) > 0
 3060 yposnew = NP(2) + abs(sin(omega * (timer - time0) + phi) * A) * exp(-fric * (timer-time0))
 3070 speed = abs(-fric * (yposnew - NP(2)) + (omega * cos(omega * (timer - time0) + phi) * A) * exp(-fric * (timer - time0)))
 3080 if (timer - prevt) < dt then goto 3050 else prevt = timer
 3090 locate bh - ypos + 1, bcs + NP(1) * 2: print " ": ypos = int(yposnew)
 3100 locate bh - ypos + 1, bcs + NP(1) * 2: print CHR$(NP(3))
-3105 locate 6, 1: print ypos: locate 7, 1: print A: locate 8, 1: print omega: locate 9, 1: print phi: locate 10,1: print speed
 3110 wend
 3500 return
 
-4000 REM DROP NEW SYMBOL
-4010 freq = 22.0 / 14.0: fric = 0.5: tc = 3 / fric
-4020 ypos = bh: locate bh - ypos + 1, bcs + NP(1) * 2: print CHR$(NP(3))
-4030 time0 = timer: dt = 0.01: prevt = time0
-4040 while ((timer - time0) <= tc) or (ypos - NP(2)) > 1
-4045 locate 6, 1: print ypos
-4050 yposnew = NP(2) + abs(cos(freq * (timer - time0)) * (bh - NP(2))) * exp(-fric * (timer-time0))
-4060 if (timer - prevt) < dt then goto 3050 else prevt = timer
-4070 locate bh - ypos + 1, bcs + NP(1) * 2: print " ": ypos = int(yposnew)
-4080 locate bh - ypos + 1, bcs + NP(1) * 2: print CHR$(NP(3))
-4090 wend
+4000 REM NETSKY AT WORK
+4010 locate 7, 1: print "AI at work...": CC = 1 + int(rnd * bl)
+4020 if (CC < 1) or (CC > bl) then goto 4010
+4030 CCI = int(CC): LASTAVAIL = BD(CCI * bh)
+4040 if LASTAVAIL > 0 then goto 4010
+4050 i = 1
+4060 while BD((CCI - 1) * bh + i) > 0: i = i + 1: wend
+4070 NP(1) = CCI: NP(2) = i: NP(3) = 79: BD((NP(1) - 1) * bh + NP(2)) = 2
+4080 gosub 3000
 4500 return
 
 
