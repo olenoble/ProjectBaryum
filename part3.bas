@@ -11,20 +11,18 @@
 500 REM GAME LOOP
 510 screen 2: cls
 520 gosub 1000
-530 iter = 0: maxiter = 10: view (0,0)-(boardstart*8, 199): haswon = 0: isfinished = 0 
+530 iter = 0: maxiter = bl * bh: view (0,0)-(boardstart*8, 199): haswon = 0: isfinished = 0 
 540 while (iter < maxiter) and (isfinished = 0)
 550 gosub 2000
-570 if haswon = 0 then gosub 4000
-580 rem gosub 4000  <<-- display some did you know ?!
-590 rem gosub 7000
-595 iter = iter + 1
-600 wend
-605 input "nada yet", n$: system
-610 if haswon then gosub 700 else locate 6, 1: input "YOU WON!!! PRESS ENTER TO CONTINUE", E$
+560 if haswon = 0 then gosub 4000
+570 rem gosub 4000  <<-- display some did you know ?!
+575 iter = iter + 1
+580 wend
+610 if haswon = 0 then gosub 700 else locate 22, 1: input "YOU WON!!! PRESS ENTER TO CONTINUE", E$
 620 return
 
 700 REM YOU LOSE
-710 locate 6,1: input "OMG, YOU LOST!!! DO YOU WANT TO TRY AGAIN [Y/N] ?", T$
+710 locate 22,1: input "OMG, YOU LOST!!! DO YOU WANT TO TRY AGAIN [Y/N] ?", T$
 720 if (T$ = "Y") or (T$ = "y") then gothit = 0: ig = 2: jg = 1: goto 510 else system
 
 1000 REM BOARD GENERATION
@@ -45,10 +43,11 @@
 2060 while BD((CCI - 1) * bh + i) > 0: i = i + 1: wend
 2070 NP(1) = CCI: NP(2) = i: NP(3) = 88: BD((NP(1) - 1) * bh + NP(2)) = 1
 2080 gosub 3000
-2500 return
+2090 gosub 5000
+2100 return
 
 3000 REM DROP NEW SYMBOL
-3010 freq = 22.0 / 7.0: fric = 0.75: tc = 3 / fric: omega = sqr(freq * freq - fric * fric)
+3010 freq = 22.0 / 7.0 * 3: fric = 0.75 * 3: tc = 3 / fric: omega = sqr(freq * freq - fric * fric)
 3020 ratio = sqr(1 + fric * fric / (omega * omega)): A = ratio * (bh - NP(2)): phi = atn(1 / (ratio * SQR(- 1 /(ratio * ratio) + 1)))
 3030 ypos = bh: locate bh - ypos + 1, bcs + NP(1) * 2: print CHR$(NP(3))
 3040 time0 = timer: dt = 0.01: prevt = time0: speed = 0
@@ -59,21 +58,41 @@
 3090 locate bh - ypos + 1, bcs + NP(1) * 2: print " ": ypos = int(yposnew)
 3100 locate bh - ypos + 1, bcs + NP(1) * 2: print CHR$(NP(3))
 3110 wend
-3500 return
+3120 return
 
 4000 REM NETSKY AT WORK
-4010 locate 7, 1: print "AI at work...": CC = 1 + int(rnd * bl)
-4020 if (CC < 1) or (CC > bl) then goto 4010
-4030 CCI = int(CC): LASTAVAIL = BD(CCI * bh)
-4040 if LASTAVAIL > 0 then goto 4010
-4050 i = 1
-4060 while BD((CCI - 1) * bh + i) > 0: i = i + 1: wend
-4070 NP(1) = CCI: NP(2) = i: NP(3) = 79: BD((NP(1) - 1) * bh + NP(2)) = 2
-4080 gosub 3000
-4500 return
+4010 locate 7, 1: print "AI at work...": method = rnd: method2 = rnd
+4020 if method <= 1 / 3.0 then CC = CCI
+4030 if (method > 1 / 3.0) and (method <= 2.0 / 3.0) and (method2 <= 0.5) then CC = CCI - 1
+4040 if (method > 1 / 3.0) and (method <= 2.0 / 3.0) and (method2 > 0.5) then CC = CCI + 1
+4050 if (method > 2 / 3.0) then CC = 1 + int(rnd * bl)
+4060 if (CC < 1) or (CC > bl) then goto 4010
+4070 CCI = int(CC): LASTAVAIL = BD(CCI * bh)
+4080 if LASTAVAIL > 0 then goto 4010
+4090 i = 1
+4100 while BD((CCI - 1) * bh + i) > 0: i = i + 1: wend
+4110 NP(1) = CCI: NP(2) = i: NP(3) = 79: BD((NP(1) - 1) * bh + NP(2)) = 2
+4120 gosub 3000
+4130 gosub 5000
+4140 return
 
+5000 REM CHECK IF WIN
+5010 if NP(3) = 88 then tocheck = 1 else tocheck = 2
+5020 maxdist = 0: tempdist = 0
+5030 for i = 1 to bh
+5040 if BD((NP(1) - 1) * bh + i) = tocheck then tempdist = tempdist + 1 else gosub 5500
+5050 next i
+5060 tempdist = 0: colmax = maxdist
+5070 for i = 1 to bl
+5080 if BD((i - 1) * bh + NP(2)) = tocheck then tempdist = tempdist + 1 else gosub 5500
+5090 next i
+5100 if maxdist >= 4 then isfinished = 1
+5110 if (maxdist >= 4) and NP(3) = 88 then haswon = 1
+5120 locate 8, 1: print "Test = "; tocheck; " - "; colmax; " - "; maxdist: input "", G$
+5500 return
 
-5000 REM DATA FOR MAZE 
-5010 DATA 1, 1, 1, -1, 0, 0, -1, -1, 1, 1, 1, 1, -1, 0, 0, 0, 1, 1, 1, -1, 0, 0, 0, 0, -1, 0, 1, -1, -1, 0, 0, 0
-
+5500 REM RESET & MAX CALC
+5510 maxdist = 0.5 * ((maxdist + tempdist) + abs(maxdist - tempdist))
+5520 tempdist = 0
+5530 return
 
