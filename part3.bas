@@ -18,11 +18,11 @@
 570 rem gosub 4000  <<-- display some did you know ?!
 575 iter = iter + 1
 580 wend
-610 if haswon = 0 then gosub 700 else locate 22, 1: input "YOU WON!!! PRESS ENTER TO CONTINUE", E$
+610 if haswon = 0 then gosub 700 else locate 23, 1: input "YOU WON!!! PRESS ENTER TO CONTINUE", E$
 620 return
 
 700 REM YOU LOSE
-710 locate 22,1: input "OMG, YOU LOST!!! DO YOU WANT TO TRY AGAIN [Y/N] ?", T$
+710 locate 23,1: input "OMG, YOU LOST!!! DO YOU WANT TO TRY AGAIN [Y/N] ?", T$
 720 if (T$ = "Y") or (T$ = "y") then gothit = 0: ig = 2: jg = 1: goto 510 else system
 
 1000 REM BOARD GENERATION
@@ -82,14 +82,26 @@
 5030 for i = 1 to bh
 5040 if BD((NP(1) - 1) * bh + i) = tocheck then tempdist = tempdist + 1 else gosub 5500
 5050 next i
-5060 tempdist = 0: colmax = maxdist
+5060 gosub 5500
 5070 for i = 1 to bl
 5080 if BD((i - 1) * bh + NP(2)) = tocheck then tempdist = tempdist + 1 else gosub 5500
 5090 next i
-5100 if maxdist >= 4 then isfinished = 1
-5110 if (maxdist >= 4) and NP(3) = 88 then haswon = 1
-5120 locate 8, 1: print "Test = "; tocheck; " - "; colmax; " - "; maxdist: input "", G$
-5500 return
+5100 gosub 5500
+5110 starth = NP(1) + NP(2) - 1
+5120 if starth <= bl then endi = starth else endi = bl
+5130 for i = 1 to endi
+5140 if BD((i - 1) * bh + starth - i + 1) = tocheck then tempdist = tempdist + 1 else gosub 5500
+5150 next i
+5160 gosub 5500
+5170 starth = bl - NP(1) + NP(2)
+5180 if starth <= bl then endi = bl + 1 - starth else endi = 1
+5190 for i = bl to endi step -1
+5200 if BD((i - 1) * bh + starth - (bl - i)) = tocheck then tempdist = tempdist + 1 else gosub 5500
+5210 next i
+5220 gosub 5500
+5230 if maxdist >= 4 then isfinished = 1
+5240 if (maxdist >= 4) and NP(3) = 88 then haswon = 1
+5250 return
 
 5500 REM RESET & MAX CALC
 5510 maxdist = 0.5 * ((maxdist + tempdist) + abs(maxdist - tempdist))
