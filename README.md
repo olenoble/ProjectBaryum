@@ -1,5 +1,5 @@
 # Project Noel / Project Baryum
-You know what it is ;-)
+A retro text-game entirely coded in gw-basic as a gift for nerdy friends :-)
 
 Instructions:
 1. Download and install DOSBox.
